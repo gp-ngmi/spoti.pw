@@ -43,7 +43,10 @@ jobs:
         run: |
           mkdir -p ipa
           python3 -m pip install --break-system-packages gdown
-          gdown "https://drive.google.com/uc?id=1X-anaXUr5L_pP2OTdzX4ThEh-EvaXQ8i" -O ipa/spotify.ipa
+          URL="${{ inputs.ipa_url }}"
+          ID=$(echo "$URL" | sed -n 's/.*\/file\/d\/\([^\/]*\).*/\1/p')
+          [ -z "$ID" ] && ID=$(echo "$URL" | sed -n 's/.*[?&]id=\([^&]*\).*/\1/p')
+          gdown "$ID" -O ipa/spotify.ipa
           case "$(file --mime-type -b ipa/spotify.ipa)" in application/zip|application/x-ios-app) ;; *) echo "::error::Not an IPA"; exit 1 ;; esac
       
       - run: make release
